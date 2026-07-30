@@ -1,0 +1,6 @@
+// SHA SHIELDED_VM_DISABLED: integrity monitoring should be enabled.
+RawEntityMetadata
+| where Environment == 'GCP' and Identifiers.Type == 'REPLACE_WITH_GCP_COMPUTE_INSTANCE_TYPE'
+| extend IntegrityMonitoringEnabled = coalesce(tobool(Record.shieldedInstanceConfig.enableIntegrityMonitoring), false)
+| extend HealthStatus = iff(IntegrityMonitoringEnabled, 'HEALTHY', 'UNHEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

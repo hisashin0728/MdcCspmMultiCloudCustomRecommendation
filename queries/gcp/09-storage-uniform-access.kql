@@ -1,0 +1,6 @@
+// SHA BUCKET_POLICY_ONLY_DISABLED.
+RawEntityMetadata
+| where Environment == 'GCP' and Identifiers.Type == 'REPLACE_WITH_GCP_STORAGE_BUCKET_TYPE'
+| extend UniformAccessEnabled = coalesce(tobool(Record.iamConfiguration.uniformBucketLevelAccess.enabled), false)
+| extend HealthStatus = iff(UniformAccessEnabled, 'HEALTHY', 'UNHEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

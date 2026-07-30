@@ -1,0 +1,6 @@
+// AWS Security Hub CloudTrail.4: CloudTrail log file validation should be enabled.
+RawEntityMetadata
+| where Environment == 'AWS' and Identifiers.Type == 'cloudtrail.trail'
+| extend IsEnabled = tobool(Record.LogFileValidationEnabled)
+| extend HealthStatus = iff(IsEnabled == false, 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

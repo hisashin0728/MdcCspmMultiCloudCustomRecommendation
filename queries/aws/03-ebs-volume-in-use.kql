@@ -1,0 +1,6 @@
+// AWS Config ec2-volume-inuse-check: EBS volumes should be attached when retained.
+RawEntityMetadata
+| where Environment == 'AWS' and Identifiers.Type == 'ec2.volume'
+| extend VolumeState = tostring(Record.State)
+| extend HealthStatus = iff(VolumeState =~ 'available', 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

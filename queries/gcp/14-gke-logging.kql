@@ -1,0 +1,6 @@
+// SHA CLUSTER_LOGGING_DISABLED.
+RawEntityMetadata
+| where Environment == 'GCP' and Identifiers.Type == 'REPLACE_WITH_GCP_GKE_CLUSTER_TYPE'
+| extend LoggingService = tostring(Record.loggingService)
+| extend HealthStatus = iff(isempty(LoggingService) or LoggingService =~ 'none', 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

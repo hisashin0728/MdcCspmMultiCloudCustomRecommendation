@@ -1,0 +1,6 @@
+// AWS Security Hub CloudTrail.5: Trails should send logs to CloudWatch Logs.
+RawEntityMetadata
+| where Environment == 'AWS' and Identifiers.Type == 'cloudtrail.trail'
+| extend LogGroupArn = tostring(Record.CloudWatchLogsLogGroupArn)
+| extend HealthStatus = iff(isempty(LogGroupArn), 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

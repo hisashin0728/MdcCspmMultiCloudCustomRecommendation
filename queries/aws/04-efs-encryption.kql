@@ -1,0 +1,6 @@
+// AWS Security Hub EFS.1: EFS file systems should be encrypted at rest.
+RawEntityMetadata
+| where Environment == 'AWS' and Identifiers.Type == 'efs.filesystem' // Verify in Categories.
+| extend IsEncrypted = tobool(Record.Encrypted)
+| extend HealthStatus = iff(IsEncrypted == false, 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

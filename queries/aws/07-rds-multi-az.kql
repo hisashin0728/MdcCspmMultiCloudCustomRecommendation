@@ -1,0 +1,6 @@
+// AWS Security Hub RDS.5: RDS DB instances should be configured for multiple AZs.
+RawEntityMetadata
+| where Environment == 'AWS' and Identifiers.Type == 'rds.dbinstance' // Verify in Categories.
+| extend IsMultiAz = tobool(Record.MultiAZ)
+| extend HealthStatus = iff(IsMultiAz == false, 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

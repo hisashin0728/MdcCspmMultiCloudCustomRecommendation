@@ -1,0 +1,6 @@
+// AWS Security Hub CloudTrail.2: CloudTrail should use KMS encryption.
+RawEntityMetadata
+| where Environment == 'AWS' and Identifiers.Type == 'cloudtrail.trail'
+| extend KmsKeyId = tostring(Record.KmsKeyId)
+| extend HealthStatus = iff(isempty(KmsKeyId), 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

@@ -1,0 +1,6 @@
+// SHA COMPUTE_SECURE_BOOT_DISABLED.
+RawEntityMetadata
+| where Environment == 'GCP' and Identifiers.Type == 'REPLACE_WITH_GCP_COMPUTE_INSTANCE_TYPE'
+| extend SecureBootEnabled = coalesce(tobool(Record.shieldedInstanceConfig.enableSecureBoot), false)
+| extend HealthStatus = iff(SecureBootEnabled, 'HEALTHY', 'UNHEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

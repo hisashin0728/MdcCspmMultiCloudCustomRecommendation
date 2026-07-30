@@ -1,0 +1,6 @@
+// SHA BUCKET_CMEK_DISABLED. Enable this only where organizational policy requires CMEK.
+RawEntityMetadata
+| where Environment == 'GCP' and Identifiers.Type == 'REPLACE_WITH_GCP_STORAGE_BUCKET_TYPE'
+| extend DefaultKmsKey = tostring(Record.encryption.defaultKmsKeyName)
+| extend HealthStatus = iff(isempty(DefaultKmsKey), 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

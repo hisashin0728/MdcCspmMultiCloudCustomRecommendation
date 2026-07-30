@@ -1,0 +1,6 @@
+// SHA IP_FORWARDING_ENABLED.
+RawEntityMetadata
+| where Environment == 'GCP' and Identifiers.Type == 'REPLACE_WITH_GCP_COMPUTE_INSTANCE_TYPE'
+| extend IpForwardingEnabled = coalesce(tobool(Record.canIpForward), false)
+| extend HealthStatus = iff(IpForwardingEnabled, 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

@@ -1,0 +1,6 @@
+// SHA NETWORK_POLICY_DISABLED.
+RawEntityMetadata
+| where Environment == 'GCP' and Identifiers.Type == 'REPLACE_WITH_GCP_GKE_CLUSTER_TYPE'
+| extend NetworkPolicyEnabled = coalesce(tobool(Record.networkPolicy.enabled), false)
+| extend HealthStatus = iff(NetworkPolicyEnabled, 'HEALTHY', 'UNHEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

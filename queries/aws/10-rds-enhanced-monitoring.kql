@@ -1,0 +1,6 @@
+// AWS Security Hub RDS.6: Enhanced Monitoring should be configured.
+RawEntityMetadata
+| where Environment == 'AWS' and Identifiers.Type == 'rds.dbinstance' // Verify in Categories.
+| extend MonitoringInterval = toint(Record.MonitoringInterval)
+| extend HealthStatus = iff(MonitoringInterval == 0, 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

@@ -1,0 +1,6 @@
+// SHA WORKLOAD_IDENTITY_DISABLED.
+RawEntityMetadata
+| where Environment == 'GCP' and Identifiers.Type == 'REPLACE_WITH_GCP_GKE_CLUSTER_TYPE'
+| extend WorkloadPool = tostring(Record.workloadIdentityConfig.workloadPool)
+| extend HealthStatus = iff(isempty(WorkloadPool), 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

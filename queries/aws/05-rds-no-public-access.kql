@@ -1,0 +1,6 @@
+// AWS Security Hub RDS.2: RDS DB instances should prohibit public access.
+RawEntityMetadata
+| where Environment == 'AWS' and Identifiers.Type == 'rds.dbinstance' // Verify in Categories.
+| extend IsPublic = tobool(Record.PubliclyAccessible)
+| extend HealthStatus = iff(IsPublic == true, 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

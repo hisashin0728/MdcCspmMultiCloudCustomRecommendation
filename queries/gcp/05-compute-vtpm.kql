@@ -1,0 +1,6 @@
+// SHA SHIELDED_VM_DISABLED: virtual TPM should be enabled.
+RawEntityMetadata
+| where Environment == 'GCP' and Identifiers.Type == 'REPLACE_WITH_GCP_COMPUTE_INSTANCE_TYPE'
+| extend VtpmEnabled = coalesce(tobool(Record.shieldedInstanceConfig.enableVtpm), false)
+| extend HealthStatus = iff(VtpmEnabled, 'HEALTHY', 'UNHEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

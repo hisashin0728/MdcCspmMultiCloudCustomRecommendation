@@ -1,0 +1,6 @@
+// AWS Security Hub RDS.8: RDS DB instances should have deletion protection enabled.
+RawEntityMetadata
+| where Environment == 'AWS' and Identifiers.Type == 'rds.dbinstance' // Verify in Categories.
+| extend IsProtected = tobool(Record.DeletionProtection)
+| extend HealthStatus = iff(IsProtected == false, 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

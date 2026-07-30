@@ -1,0 +1,6 @@
+// SHA BUCKET_LOGGING_DISABLED.
+RawEntityMetadata
+| where Environment == 'GCP' and Identifiers.Type == 'REPLACE_WITH_GCP_STORAGE_BUCKET_TYPE'
+| extend LogBucket = tostring(Record.logging.logBucket)
+| extend HealthStatus = iff(isempty(LogBucket), 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

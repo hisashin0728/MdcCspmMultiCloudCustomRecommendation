@@ -1,0 +1,6 @@
+// AWS Security Hub GuardDuty.1: GuardDuty should be enabled.
+RawEntityMetadata
+| where Environment == 'AWS' and Identifiers.Type == 'guardduty.detector' // Verify in Categories.
+| extend DetectorStatus = tostring(Record.Status)
+| extend HealthStatus = iff(DetectorStatus !~ 'ENABLED', 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

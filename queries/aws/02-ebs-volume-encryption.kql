@@ -1,0 +1,7 @@
+// AWS Security Hub EC2.3: Attached EBS volumes should be encrypted at rest.
+RawEntityMetadata
+| where Environment == 'AWS' and Identifiers.Type == 'ec2.volume'
+| extend IsAttached = tostring(Record.State) =~ 'in-use'
+| extend IsEncrypted = tobool(Record.Encrypted)
+| extend HealthStatus = iff(IsAttached and IsEncrypted == false, 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

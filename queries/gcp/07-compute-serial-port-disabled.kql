@@ -1,0 +1,11 @@
+// SHA COMPUTE_SERIAL_PORTS_ENABLED.
+RawEntityMetadata
+| where Environment == 'GCP' and Identifiers.Type == 'REPLACE_WITH_GCP_COMPUTE_INSTANCE_TYPE'
+| mv-apply MetadataItem = Record.metadata.items on (
+    summarize SerialPortEnabled = countif(
+        tostring(MetadataItem.key) =~ 'serial-port-enable'
+        and tostring(MetadataItem.value) =~ 'true'
+    ) > 0
+)
+| extend HealthStatus = iff(SerialPortEnabled, 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

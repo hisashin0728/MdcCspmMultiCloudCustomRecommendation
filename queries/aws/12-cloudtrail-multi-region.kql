@@ -1,0 +1,6 @@
+// AWS Security Hub CloudTrail.1: At least one multi-Region trail should exist.
+RawEntityMetadata
+| where Environment == 'AWS' and Identifiers.Type == 'cloudtrail.trail'
+| extend IsMultiRegion = tobool(Record.IsMultiRegionTrail)
+| extend HealthStatus = iff(IsMultiRegion == false, 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

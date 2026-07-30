@@ -1,0 +1,6 @@
+// SHA LOCKED_RETENTION_POLICY_NOT_SET. Scope this recommendation to log buckets.
+RawEntityMetadata
+| where Environment == 'GCP' and Identifiers.Type == 'REPLACE_WITH_GCP_STORAGE_BUCKET_TYPE'
+| extend IsLocked = coalesce(tobool(Record.retentionPolicy.isLocked), false)
+| extend HealthStatus = iff(IsLocked, 'HEALTHY', 'UNHEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

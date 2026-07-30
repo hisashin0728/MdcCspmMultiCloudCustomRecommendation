@@ -1,0 +1,6 @@
+// SHA LEGACY_AUTHORIZATION_ENABLED.
+RawEntityMetadata
+| where Environment == 'GCP' and Identifiers.Type == 'REPLACE_WITH_GCP_GKE_CLUSTER_TYPE'
+| extend LegacyAbacEnabled = coalesce(tobool(Record.legacyAbac.enabled), false)
+| extend HealthStatus = iff(LegacyAbacEnabled, 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

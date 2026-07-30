@@ -1,0 +1,6 @@
+// AWS Config lambda-dlq-check: Asynchronous Lambda functions should use a DLQ.
+RawEntityMetadata
+| where Environment == 'AWS' and Identifiers.Type == 'lambda.function' // Verify in Categories.
+| extend DeadLetterTarget = tostring(Record.DeadLetterConfig.TargetArn)
+| extend HealthStatus = iff(isempty(DeadLetterTarget), 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

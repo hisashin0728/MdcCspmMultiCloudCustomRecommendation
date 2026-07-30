@@ -1,0 +1,8 @@
+// SHA PUBLIC_IP_ADDRESS. Replace TargetType with the discovered Compute Instance type.
+RawEntityMetadata
+| where Environment == 'GCP' and Identifiers.Type == 'REPLACE_WITH_GCP_COMPUTE_INSTANCE_TYPE'
+| mv-apply NetworkInterface = Record.networkInterfaces on (
+    summarize IsUnhealthy = countif(tostring(NetworkInterface.accessConfigs) has 'natIP') > 0
+)
+| extend HealthStatus = iff(IsUnhealthy, 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

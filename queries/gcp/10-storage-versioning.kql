@@ -1,0 +1,6 @@
+// SHA OBJECT_VERSIONING_DISABLED. Scope this recommendation to log-destination buckets if required.
+RawEntityMetadata
+| where Environment == 'GCP' and Identifiers.Type == 'REPLACE_WITH_GCP_STORAGE_BUCKET_TYPE'
+| extend VersioningEnabled = coalesce(tobool(Record.versioning.enabled), false)
+| extend HealthStatus = iff(VersioningEnabled, 'HEALTHY', 'UNHEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

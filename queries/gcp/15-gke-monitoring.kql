@@ -1,0 +1,6 @@
+// SHA CLUSTER_MONITORING_DISABLED.
+RawEntityMetadata
+| where Environment == 'GCP' and Identifiers.Type == 'REPLACE_WITH_GCP_GKE_CLUSTER_TYPE'
+| extend MonitoringService = tostring(Record.monitoringService)
+| extend HealthStatus = iff(isempty(MonitoringService) or MonitoringService =~ 'none', 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

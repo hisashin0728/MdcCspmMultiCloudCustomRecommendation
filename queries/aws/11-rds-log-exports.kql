@@ -1,0 +1,6 @@
+// AWS Security Hub RDS.9: RDS logging should be enabled and exported.
+RawEntityMetadata
+| where Environment == 'AWS' and Identifiers.Type == 'rds.dbinstance' // Verify in Categories.
+| extend LogExports = Record.EnabledCloudwatchLogsExports
+| extend HealthStatus = iff(array_length(LogExports) == 0, 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

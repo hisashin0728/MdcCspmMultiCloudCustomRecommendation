@@ -1,0 +1,6 @@
+// AWS Security Hub EC2.9: EC2 instances should not have a public IPv4 address.
+RawEntityMetadata
+| where Environment == 'AWS' and Identifiers.Type == 'ec2.networkinterface'
+| extend PublicIp = tostring(Record.Association.PublicIp)
+| extend HealthStatus = iff(isnotempty(PublicIp), 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

@@ -1,0 +1,6 @@
+// SHA PRIVATE_CLUSTER_DISABLED.
+RawEntityMetadata
+| where Environment == 'GCP' and Identifiers.Type == 'REPLACE_WITH_GCP_GKE_CLUSTER_TYPE'
+| extend PrivateNodesEnabled = coalesce(tobool(Record.privateClusterConfig.enablePrivateNodes), false)
+| extend HealthStatus = iff(PrivateNodesEnabled, 'HEALTHY', 'UNHEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

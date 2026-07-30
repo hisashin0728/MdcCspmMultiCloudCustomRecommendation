@@ -1,0 +1,6 @@
+// AWS Security Hub Lambda.3: Lambda functions should be in a VPC when policy requires isolation.
+RawEntityMetadata
+| where Environment == 'AWS' and Identifiers.Type == 'lambda.function' // Verify in Categories.
+| extend VpcId = tostring(Record.VpcConfig.VpcId)
+| extend HealthStatus = iff(isempty(VpcId), 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

@@ -1,0 +1,11 @@
+// SHA COMPUTE_PROJECT_WIDE_SSH_KEYS_ALLOWED.
+RawEntityMetadata
+| where Environment == 'GCP' and Identifiers.Type == 'REPLACE_WITH_GCP_COMPUTE_INSTANCE_TYPE'
+| mv-apply MetadataItem = Record.metadata.items on (
+    summarize BlocksProjectKeys = countif(
+        tostring(MetadataItem.key) =~ 'block-project-ssh-keys'
+        and tostring(MetadataItem.value) =~ 'true'
+    ) > 0
+)
+| extend HealthStatus = iff(BlocksProjectKeys, 'HEALTHY', 'UNHEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

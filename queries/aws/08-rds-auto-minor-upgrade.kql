@@ -1,0 +1,6 @@
+// AWS Security Hub RDS.13: Automatic minor version upgrades should be enabled.
+RawEntityMetadata
+| where Environment == 'AWS' and Identifiers.Type == 'rds.dbinstance' // Verify in Categories.
+| extend IsEnabled = tobool(Record.AutoMinorVersionUpgrade)
+| extend HealthStatus = iff(IsEnabled == false, 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus

@@ -1,0 +1,6 @@
+// AWS Security Hub CloudWatch.1: Log groups should be encrypted with KMS.
+RawEntityMetadata
+| where Environment == 'AWS' and Identifiers.Type == 'logs.loggroup' // Verify in Categories.
+| extend KmsKeyId = tostring(Record.KmsKeyId)
+| extend HealthStatus = iff(isempty(KmsKeyId), 'UNHEALTHY', 'HEALTHY')
+| project Id, Name, Environment, Identifiers, AdditionalData, Record, HealthStatus
