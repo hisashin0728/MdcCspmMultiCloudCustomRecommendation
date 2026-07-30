@@ -27,6 +27,23 @@ Microsoft Defender for Cloud の Defender CSPM で、AWS/GCP 資産を対象と�
 | 欠損値だけから設定不良と断定する | API の既定値、権限不足、未収集を区別できない場合があります。フィールド充足率と既知資産で検証します。 |
 | KQL から設定を修復する | クエリは読み取りと健全性分類のみです。修復はクラウド側の手順または自動化を別途用意します。 |
 
+### 仕様上実現できないカスタム推奨事項の例10個
+
+次の例は、通常の構成メタデータだけが `RawEntityMetadata` に収集される前提では、カスタム推奨事項単独で実現できません。必要な事実が別の `Record` として収集される場合は、その収集範囲に限って再評価できます。
+
+| # | 実現できない推奨事項例 | 実現できない理由 | 代替手段 |
+|---:|---|---|---|
+| 1 | 過去90日間にセキュリティグループが何回変更されたか評価する | 最新の構成レコードは変更イベントの履歴を保持しません | AWS CloudTrail、Google Cloud Audit Logs、SIEMで監査ログを集計する |
+| 2 | インターネットからEC2、RDS、GCE VMへ実際に接続できるか検査する | 構成上の公開設定は判定できても、DNS、経路、ファイアウォール、サービス待受を含む実通信は試行できません | 外部Attack Surface Management、脆弱性スキャナー、接続テストを使用する |
+| 3 | S3バケットやCloud Storage内のファイルに個人情報が含まれていないか検査する | `RawEntityMetadata` は通常、オブジェクト本文やファイル内容を保持しません | DSPM、DLP、Macie、Sensitive Data Protectionを使用する |
+| 4 | IAMユーザーが特定ロールを実際に引き受けられるか完全判定する | ポリシーのAllowだけでなく、信頼ポリシー、明示的Deny、SCP、Permission Boundary、Condition、実行時コンテキストの総合評価が必要です | IAM Access Analyzer、Policy Simulator、CloudTrailの `AssumeRole` イベントを使用する |
+| 5 | EC2やGCE VM内の全パッケージに既知の脆弱性がないことを証明する | 構成メタデータだけではゲストOS内のパッケージ、バージョン、実行状態を網羅できません | Defender for Servers、Amazon Inspector、VM Manager等の脆弱性管理を使用する |
+| 6 | Secrets ManagerやSecret Managerの秘密値が十分に強く、漏えいしていないか検査する | 秘密値そのものは構成メタデータとして公開されず、値の強度や漏えい状況を評価できません | シークレットスキャン、漏えい検知、ローテーション管理を使用する |
+| 7 | AWSアカウントにCloudTrailが1つも存在しないことを、返却対象となる親資産なしで検出する | 存在しないTrailに対応する出力行を生成できません | アカウント等の収集済み親資産を起点にするか、AWS Config／Security Hubのアカウント単位評価を使用する |
+| 8 | 1つの推奨事項でAWS EC2とGCP Compute Engineを横断比較して状態を返す | 1つのカスタム推奨事項で複数環境を対象にできません | AWS用とGCP用に推奨事項を分け、結果側で集約する |
+| 9 | AWS OrganizationsまたはGCP組織内の全アカウント／プロジェクトがMDCへ接続済みであることを証明する | 割り当て外または未接続の環境は、評価入力に現れないため存在を把握できません | Organizations／Cloud Resource ManagerのインベントリとMDC接続一覧を外部で突合する |
+| 10 | 不健全と判定したS3公開設定、IAMポリシー、ファイアウォール規則をKQLで自動修復する | カスタム推奨事項のKQLは読み取りと分類のみで、クラウドAPIへの変更操作を実行しません | Workflow Automation、Logic Apps、Lambda、Cloud Functions等で承認付き修復を構成する |
+
 詳細なフィールド境界、可能な判定、代替策は [`RawEntityMetadata` とフィールド](docs/02-data-model.md) を参照してください。
 
 ## 対象読者
