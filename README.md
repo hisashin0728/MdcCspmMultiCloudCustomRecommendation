@@ -44,6 +44,25 @@ Microsoft Defender for Cloud の Defender CSPM で、AWS/GCP 資産を対象と�
 | 9 | AWS OrganizationsまたはGCP組織内の全アカウント／プロジェクトがMDCへ接続済みであることを証明する | 割り当て外または未接続の環境は、評価入力に現れないため存在を把握できません | Organizations／Cloud Resource ManagerのインベントリとMDC接続一覧を外部で突合する |
 | 10 | 不健全と判定したS3公開設定、IAMポリシー、ファイアウォール規則をKQLで自動修復する | カスタム推奨事項のKQLは読み取りと分類のみで、クラウドAPIへの変更操作を実行しません | Workflow Automation、Logic Apps、Lambda、Cloud Functions等で承認付き修復を構成する |
 
+### 仕様上実現できるカスタム推奨事項の例10個
+
+次の例は、必要な `Identifiers.Type`、`Record`、関連レコードが割り当て範囲の `RawEntityMetadata` に収集されている場合に実現できます。実際の型名、フィールド、値、充足率をお客様環境で確認する必要があります。
+
+| # | 実現できる推奨事項例 | 主な証拠 | 判定方法 |
+|---:|---|---|---|
+| 1 | EBSスナップショットが公開復元可能になっていないか評価する | `ec2.snapshot`、`ec2.createvolumepermission` | Snapshot IDで `leftouter` し、`Group.Value == 'all'` の関連権限があれば `UNHEALTHY` にする |
+| 2 | 停止したEC2インスタンスが30日以上経過していないか評価する | `ec2.instance` の状態と状態遷移日時 | 現在レコード内の日時を `ago(30d)` と比較する |
+| 3 | 未使用のEC2セキュリティグループを評価する | Security Group、EC2、Network Interfaceの関連付け | 配列を `mv-expand` し、関連付け集合に含まれないSecurity Groupを `UNHEALTHY` にする |
+| 4 | CloudTrailがCloudWatch Logsへ正常に配信しているか評価する | `cloudtrail.trail`、`cloudtrail.trailstatus` | Trail名等で結合し、Log Group ARNと最新配信日時を判定する |
+| 5 | カスタマー管理KMSキーの自動ローテーションが有効か評価する | `kms.key`、`kms.keyrotationstatus` | Key ARNで関連付け、対象キーがローテーション無効集合に含まれるか判定する |
+| 6 | KMSキーが意図せず削除待ちになっていないか評価する | `kms.key` の `KeyState` | `PendingDeletion` との単一フィールド比較で判定する |
+| 7 | VPC Flow Logsが有効か評価する | `ec2.vpc`、`ec2.vpc-flow-log` | ActiveなFlow LogとVPCを結合し、`leftanti` で関連レコードがないVPCを検出する |
+| 8 | VPC Peeringルートが全IPv4／IPv6通信を許可していないか評価する | `ec2.routetable` の `Routes` | ルート配列を展開し、Peering接続先が `0.0.0.0/0` または `::/0` の資産を判定する |
+| 9 | ECRリポジトリポリシーが無条件でワイルドカードPrincipalを許可していないか評価する | `ecr.repository`、`ecr.repositorypolicy` | JSON文字列を解析してStatementを展開し、Principal、Effect、Conditionを評価する |
+| 10 | IAMユーザーに管理ポリシーまたはインラインポリシーが直接関連付けられていないか評価する | `iam.user`、`iam.attachedpolicytype`、`iam.userpolicies` | ユーザー名とポリシー関連レコードを照合し、直接関連付けのあるユーザーを `UNHEALTHY` にする |
+
+これらは構成メタデータに基づく判定です。関連レコードの未収集を設定の不存在と誤認しないよう、正常・異常の既知資産を使って検証し、複数アカウント・リージョンでは一意な複合キーで関連付けてください。
+
 詳細なフィールド境界、可能な判定、代替策は [`RawEntityMetadata` とフィールド](docs/02-data-model.md) を参照してください。
 
 ## 対象読者
